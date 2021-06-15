@@ -17,7 +17,9 @@ concept ConstrainA = requires(T a){  // just to experiment with constrains
 template<typename T>
 concept cnst =  requires(T a)  {
 	//{a+=12} -> const char;
-	{a+"char"} -> string;
+	//{a+"char"} -> string;
+	{hash<T>{}(a)} -> int;
+//	{onlyInt(a)+1} -> int;
 };
 
 bool onlyInt(int x) {return x==1;}
@@ -38,7 +40,12 @@ class ffstm {
 			if(tree->child!=NULL) printTree(tree->child);
 			cout <<	tree->data << endl;
 		}
+		int test() {return 0;}
 };
+
+
+typedef int (ffstm<int>::*test_f)();
+typedef const filesystem::path& (filesystem::directory_entry::*path_F)() const noexcept;
 
 template<typename T> 
 T *getNames() {
@@ -64,7 +71,8 @@ filesystem::directory_entry *get() {
 
 struct castS {
 	filesystem::directory_entry d;
-	const filesystem::path &(filesystem::directory_entry::*path)() const noexcept;
+	//const filesystem::path &(filesystem::directory_entry::*path)() const noexcept;
+	path_F path_f;
 	int (*fp)();
 	filesystem::path path_t;
 };
@@ -74,15 +82,15 @@ int func() {return 0;}
 template<typename T>
 T cast(T a) { 
 	T ptr = (T)calloc(10, sizeof(T*));
-	ptr->path = &filesystem::directory_entry::path;
+	ptr->path_f = &filesystem::directory_entry::path;
 	//ptr->path = a->path; 
 	return ptr;
 	//is_base_of<>
 }
 
-template<cnst T>
+template<cnst T> // contrianed  by hashable to int
 void test(T a) {}
-
+ 
 int main() {
 #ifdef printf
 printf("%d", x(1));
@@ -103,8 +111,12 @@ printf("%d", x(1));
 	/* cast(casts, p); */
 	//casts->path = p->path;
 	struct castS *cst = cast(casts);
-	//cst->*filesystem::directory_entry::path(); // TODO not a member of castS for some reason : fix it
-	test(a); // contrian in diverse ways possible? //note : only expressions work
+	//&cst->path; // TODO not a member of castS for some reason : fix it
+	cst->*path_f(); // struct castS has member paht_f but it does not when dereferenced
+
+	test_f tst = &ffstm<int>::test;
+
+	test(2); // contrian in diverse ways possible? //note : only expressions work
 	return 0;
 }
 
