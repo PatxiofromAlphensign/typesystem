@@ -22,7 +22,7 @@ concept cnst =  requires(T a)  {
 //	{onlyInt(a)+1} -> int;
 };
 
-bool onlyInt(int x) {return x==1;}
+constexpr bool onlyInt(int x) {return x>1;}
 
 template<typename T>
 class ffstm {
@@ -43,9 +43,19 @@ class ffstm {
 		int test() {return 0;}
 };
 
-
 typedef int (ffstm<int>::*test_f)();
 typedef const filesystem::path& (filesystem::directory_entry::*path_F)() const noexcept;
+
+template<typename T>
+concept path_concept =  requires(T a)  {
+	{a} -> path_F;
+};
+
+template<typename T> requires (onlyInt(sizeof(T))) // types that are convertable to filesytem::path
+void path_req(T) { }
+
+template<typename T>
+void check(T) {}
 
 template<typename T> 
 T *getNames() {
@@ -112,9 +122,12 @@ printf("%d", x(1));
 	//casts->path = p->path;
 	struct castS *cst = cast(casts);
 	//&cst->path; // TODO not a member of castS for some reason : fix it
-	cst->*path_f(); // struct castS has member paht_f but it does not when dereferenced
+	//cst->*path_f(); // struct castS has member paht_f but it does not when dereferenced
 
 	test_f tst = &ffstm<int>::test;
+
+
+	check(p->path());
 
 	test(2); // contrian in diverse ways possible? //note : only expressions work
 	return 0;

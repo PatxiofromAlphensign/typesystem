@@ -1,0 +1,3 @@
+[submodule "lv_io"]
+	path = lv_io
+	url = https://github.com/PatxiofromAlphensign/typesystem
